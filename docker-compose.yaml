@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  cloud_service:
+    build:
+      context: .
+    container_name: cloud_service
+    depends_on:
+      db:
+        condition:
+          service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - 'docker-mysql'
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'cloud_store_db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'qwerty'
+      MYSQL_ROOT_PASSWORD: 'qwerty_root'
+    ports:
+      - '3307:3306'
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      retries: 10
+      interval: 5s
+      timeout: 60s
+    expose:
+      - '3306'
+    networks:
+      - 'docker-mysql'
+
+networks:
+  docker-mysql:
+    driver: bridge
+
